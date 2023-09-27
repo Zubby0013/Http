@@ -61,10 +61,10 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
             response.success = true;
             response.data= Data;
 
-            resp.write(JSON.stringify({response, status}));
+            resp.write(JSON.stringify({response, Status}));
             resp.end()
-        }
-        {
+        };
+        
             //post method
             if(url === "/" && method === "POST"){
                  Status = 201;
@@ -77,19 +77,19 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
                  response.data = Data;
 
                  resp.write(JSON.stringify({response, Status}));
-                 resp.end()
-            }
-        }
-        {
+                 resp.end();
+            };
+        
+        
             //Patch method 
-            if(url === "/" && method === "PATCH"){
+            if( method === "PATCH"){
                 Status = 202
 
                 const change = JSON.parse(Container);
                 
-                let detail = url?.split("/")[1];
+                let detail:any = url?.split("/")[1];
 
-                let value = parseInt(detail);
+                let value:any = parseInt(detail);
 
                 let GET = Data.some((el)=>{
                     return el.id === value;
@@ -98,12 +98,12 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
                 if(GET === false){
                     Status = 404;
 
-                    resp.write(JSON.stringify({response, Status}));
-
+                    
                     (response.message= "user not found");
                     (response.success= false);
                     (response.data = null);
-
+                    
+                    resp.write(JSON.stringify({response, Status}));
                     resp.end();
                     
                 }else{
@@ -114,14 +114,14 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
                             return {
                                 id: el.id,
                                 name: el.update,
-                                age: el.age
+                                age: el?.age
                             }
                         };
                         return el ;
-                    })
+                    });
                     Status = 200;
 
-                    (response.message = update);
+                    (response.message = "updated");
                     (response.data = Data);
                     (response.success = true);
 
@@ -129,8 +129,9 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
 
                     resp.end();
                 }
-            }    
-                {
+            } 
+          
+                
                     // PUT method 
                     if(method === "PUT"){
                          const Change = JSON.parse(Container);
@@ -147,6 +148,7 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
                             (response.data = Data);
                             (response.success = false);
                          };
+                         resp.write(JSON.stringify({response, Status}));
 
                          resp.end();
                     }else{
@@ -160,13 +162,14 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
                         Data = Data.map((el:any)=>{
                              if(el?.id === Dvalue){
                                 return{
-                                    id: el.id,
+                                    id: el?.id,
                                     name: update,
                                     age: updateAge
                                 }
                              }
                              return el
                         });
+                         Status = 200;
                         (response.message = "user founded");
                         (response.data = Data);
                         (response.success = true);
@@ -175,43 +178,43 @@ const server = http.createServer((req:IncomingMessage, resp:ServerResponse<Incom
 
                         resp.end();
                     }
-                };
-                    {
+                
+                    
                         //Delete method 
                         if(method === "DELETE"){
-                             const clear = JSON.parse(Container);
+                            const Container:any = url?.split("/")[1];
+                            
+                            let dataValue = parseInt(Container);
 
-                            let source:any = url?.split("/")[1];
-                            const num = parseInt(Container);
-                             
-                            const object = Data.map((el)=>{
-                                return el.id === num 
+                            Data = Data.filter((el:any)=>{
+                                return el?.id !== dataValue
                             });
-                            if(source === false){
-                                Status = 404;
-                                response.message = "delete failed";
-                                response.data = Data;
-                                response.success = false
-                            }else{
-                                Data = Data.map((el:any)=>{
-                                       if(el?.id === num){
-                                        el = null;
-                                       }
-                                       return el
-                                });
-                            }
                             Status = 200;
                             response.data=Data;
                             response.message = "delete data sucessfull";
                             response.success = true;
 
-                            resp.write(JSON.stringify ({response , Status}));
-                            resp.end()
+                            resp.write(JSON.stringify ({response }));
+                            resp.end();
                         }
-                    }
-            }
-        
-    })
+                        //GET 1
+                        if(method === "GET"){
+                            const build = url?.split("/")[1];
+
+                            let detail = parseInt(Container);
+
+                            let test:any = Data.find((el:any)=>{
+                                  return el.id === detail
+                            });
+                            Status = 200;
+                            response.message= "Get data successfully";
+                            response.success = true;
+                            response.data = test
+
+                            resp.write(JSON.stringify({response}));
+                            resp.end();
+                        }
+    });
 });
 
 server.listen(Port,()=>{
